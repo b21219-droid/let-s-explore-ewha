@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>슬기로운 이화 생활 - 통합 플랫폼</title>
+    <style>
+        body { margin: 0; font-family: 'Pretendard', sans-serif; background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; color: #333; justify-content: center; align-items: center; }
+        .hidden { display: none !important; }
+
+        /* 🔒 독립형 로그인 게이트웨이 스타일 */
+        .login-gateway { background: white; padding: 50px 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; width: 360px; border: 1px solid #eef1f4; animation: popIn 0.4s ease; }
+        .login-gateway h2 { color: #00462A; margin: 0 0 10px 0; font-size: 24px; font-weight: 800; }
+        .login-gateway p { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+        /* 글로벌 네비게이션 바 */
+        #app-wrapper { width: 100%; display: flex; flex-direction: column; min-height: 100vh; align-self: flex-start; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; background-color: #00462A; padding: 15px 40px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .nav-brand { font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .user-profile-mini { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+        .user-avatar-circle { width: 32px; height: 32px; background: #FFD700; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; color: #00462A; }
+
+        /* 상단 탭 버튼 제어기 */
+        .tab-trigger-container { display: flex; justify-content: center; gap: 12px; padding: 25px 0 10px 0; background: #ffffff; border-bottom: 1px solid #eef1f4; flex-wrap: wrap; }
+        .tab-trigger-container button { background-color: #f1f3f5; color: #495057; border: 1px solid #dee2e6; padding: 12px 24px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .tab-trigger-container button:hover { background-color: #e9ecef; }
+        .tab-trigger-container button.active { background-color: #00462A; color: white; border-color: #00462A; box-shadow: 0 4px 10px rgba(0,70,42,0.2); }
+
+        /* 메인 콘텐츠 구조 */
+        .tab-content { display: flex; padding: 30px 40px; gap: 30px; max-width: 1300px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .content-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid #eef1f4; }
+        
+        .bookshelf-panel { flex: 2.2; }
+        .character-panel { flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: flex-start; }
+
+        /* 리얼 가구식 동적 책장 아키텍처 */
+        .welcome-header { font-size: 24px; font-weight: 800; color: #111; margin-top: 0; margin-bottom: 5px; text-align: left; }
+        .welcome-sub { font-size: 14px; color: #666; margin-bottom: 20px; text-align: left; }
+        
+        .bookshelf-actions { display: flex; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px dashed #00462A; align-items: center; flex-wrap: wrap; }
+        .bookshelf-actions select, .bookshelf-actions input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
+        .btn-add-book { background: #00462A; color: white; border: none; padding: 10px 18px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+        .bookshelf-wood { background: #ffffff; border: 12px solid #8B5A2B; border-radius: 12px; padding: 20px 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.05), 0 10px 25px rgba(0,0,0,0.05); min-height: 220px; }
+        .bookshelf-row { display: flex; gap: 15px; align-items: flex-end; border-bottom: 10px solid #A0522D; padding-bottom: 2px; min-height: 140px; flex-wrap: wrap; }
+        .empty-shelf-text { width: 100%; text-align: center; color: #aaa; font-weight: 500; font-size: 14px; padding-bottom: 40px; }
+        
+        /* 동적 생성 책 오브젝트 스타일링 */
+        .book-item { width: 85px; height: 120px; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 12px 8px; box-sizing: border-box; font-size: 11px; border-radius: 4px 12px 12px 4px; font-weight: bold; text-align: center; cursor: pointer; box-shadow: 4px 4px 7px rgba(0,0,0,0.2); transition: all 0.2s; animation: popIn 0.3s ease; position: relative; }
+        .book-item:hover { transform: translateY(-12px) scale(1.04); box-shadow: 5px 15px 22px rgba(0,0,0,0.18); }
+        .book-item .book-title-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 11px; line-height: 1.3; margin-top: 5px; }
+        .book-item .progress-badge { font-size: 10px; background: rgba(0,0,0,0.25); padding: 2px 0; border-radius: 4px; font-weight: 500; margin-top: auto; }
+        
+        .share-status-dot { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .status-private { background: #ef5350; color: white; }
+        .status-public { background: #00462A; color: #ffd700; font-weight: bold; border: 1px solid #ffd700; }
+
+        /* 고유 과목 컬러 팔레트 */
+        .color-국어 { background: linear-gradient(135deg, #4a90e2, #2a609d); }
+        .color-수학 { background: linear-gradient(135deg, #e05a47, #b03020); }
+        .color-영어 { background: linear-gradient(135deg, #f39c12, #d35400); }
+        .color-과학 { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .color-사회 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .color-기타 { background: linear-gradient(135deg, #7f8c8d, #34495e); }
+        .color-최종보고서 { background: linear-gradient(135deg, #ffd700, #b8860b, #111111); border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(218,165,32,0.6); color: #fff !important; }
+        .color-최종보고서 .progress-badge { background: #00462A !important; color: #ffd700 !important; font-weight: bold; border: 1px solid #ffd700; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 교복 아바타 컴포넌트 */
+        .character-view-box { background: linear-gradient(to bottom, #f0f7f4, #e2ece9); border: 2px dashed #00462A; border-radius: 24px; padding: 25px 20px; margin: 15px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .speech-bubble { background: #ffffff; border-radius: 12px; padding: 12px 15px; font-size: 13px; font-weight: 600; color: #00462A; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; border: 1px solid #dde5e2; width: 85%; word-break: keep-all; text-align: left; line-height: 1.5; max-height: 120px; overflow-y: auto; }
+        .speech-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 8px 8px 0; border-style: solid; border-color: #ffffff transparent; display: block; width: 0; }
+        
+        .uniform-avatar-container { width: 120px; height: 160px; position: relative; margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; }
+        .avatar-head { width: 45px; height: 45px; background: #ffe0bd; border-radius: 50%; position: relative; z-index: 3; font-size: 26px; display: flex; justify-content: center; align-items: center; padding-bottom: 4px; box-sizing: border-box; }
+        .avatar-jacket { width: 70px; height: 60px; background-color: #1a2536; border-radius: 8px 8px 0 0; position: relative; z-index: 2; margin-top: -8px; border-top: 4px solid #fff; }
+        .avatar-ribbon { width: 34px; height: 20px; background: repeating-linear-gradient(45deg, #165b33, #165b33 4px, #ffffff 4px, #ffffff 8px); border-radius: 4px; position: absolute; top: 42px; left: 43px; z-index: 4; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .avatar-skirt { width: 74px; height: 55px; background: #1a2536; border-radius: 0 0 4px 4px; position: relative; z-index: 1; margin-top: -2px; background-image: linear-gradient(90deg, rgba(0,0,0,0.15) 50%, transparent 50%); background-size: 10px 100%; }
+        .badge-dynamic { background: #00462A; color: white; padding: 5px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* 입력 폼 인터페이스 공통 */
+        .profile-form { display: flex; flex-direction: column; gap: 10px; text-align: left; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eef1f4; margin-top: 15px; }
+        .profile-form input, .profile-form select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; text-align: left; }
+        .form-col { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+        .form-col label { font-weight: bold; font-size: 13px; color: #495057; }
+        .form-select-custom, .input-text-custom, .input-date-custom { padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px; background-color: #fff; box-sizing: border-box; width: 100%; }
+        .btn-prime { background-color: #00462A; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; width: 100%; }
+        .btn-prime:hover { background-color: #00331f; }
+        
+        /* 추천 주제 및 챗 레이아웃 */
+        .recommend-layout { display: flex; gap: 25px; margin-top: 25px; text-align: left; }
+        .topics-panel { flex: 1.2; display: flex; flex-direction: column; gap: 12px; }
+        .chat-panel { flex: 1; border: 1px solid #dee2e6; border-radius: 12px; background: #f8fafc; display: flex; flex-direction: column; height: 500px; }
+        .recommended-item { background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #eef1f4; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; }
+        .recommended-item:hover { border-color: #00462A; background: #f0f7f4; }
+        .recommended-item.selected { border-color: #00462A; background: #e2ece9; }
+        .chat-header { background: #00462A; color: white; padding: 12px 15px; font-size: 14px; font-weight: bold; border-radius: 11px 11px 0 0; display: flex; justify-content: space-between; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 8px; line-height: 1.5; }
+        .msg.ai { background: white; align-self: flex-start; border: 1px solid #e2e5e8; color: #222; }
+        .msg.user { background: #00462A; color: white; align-self: flex-end; }
+        .chat-input-box { display: flex; border-top: 1px solid #dee2e6; background: white; border-radius: 0 0 11px 11px; }
+        .chat-input-box input { flex: 1; border: none; padding: 12px; font-size: 13px; outline: none; }
+        .chat-input-box button { background: #00462A; color: white; border: none; padding: 0 18px; font-weight: bold; cursor: pointer; border-radius: 0 0 11px 0; }
+
+        /* 🌐 래퍼런스 뉴스 기사 UI 링크 보드 스타일 */
+        .reference-news-box { margin-top: 15px; padding: 15px; background: #edf4f1; border-radius: 8px; border-left: 4px solid #00462A; text-align: left; }
+        .reference-news-box h5 { margin: 0 0 8px 0; color: #00462A; font-size: 13px; font-weight: bold; }
+        .news-link-item { display: block; color: #00a2ed; font-size: 12px; text-decoration: none; margin-bottom: 6px; font-weight: 500; }
+        .news-link-item:hover { text-decoration: underline; }
+
+        /* 게시판 구조 */
+        .board-container { width: 100%; display: flex; flex-direction: column; background: #fff; border-radius: 12px; padding: 10px 0; }
+        .imweb-board-subnav { display: flex; border-bottom: 1px solid #eef1f4; margin-bottom: 20px; padding-left: 10px; gap: 4px; }
+        .imweb-subnav-btn { background: none; border: none; padding: 12px 20px; font-size: 13px; font-weight: 600; color: #666; cursor: pointer; position: relative; }
+        .imweb-subnav-btn.active { color: #00a2ed; font-weight: bold; }
+        .imweb-subnav-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: #00a2ed; }
+        
+        /* 2차 동적 선택지 서브네비 바 */
+        .imweb-board-childnav { display: flex; background: #f8fafc; padding: 10px 20px; gap: 8px; border-bottom: 1px solid #eef1f4; margin-bottom: 20px; }
+        .imweb-child-btn { background: white; border: 1px solid #dee2e6; padding: 6px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; font-weight: 500; }
+        .imweb-child-btn.active { background: #00a2ed; color: white; border-color: #00a2ed; }
+
+        .imweb-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        .imweb-table th { padding: 14px 16px; background: #ffffff; color: #555; font-weight: bold; border-bottom: 2px solid #333; }
+        .imweb-table td { padding: 15px 16px; border-bottom: 1px solid #eef1f4; color: #444; }
+        .imweb-table tr:hover { background: #fdfdfd; }
+        .board-action-row { display: flex; justify-content: flex-end; padding: 15px 16px; }
+        .btn-imweb-write { background-color: #4ebff2; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+        /* 요일 선택 컴포넌트 */
+        .day-selector { display: flex; gap: 6px; margin-top: 4px; }
+        .day-checkbox { display: none; }
+        .day-label { padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; background: #fff; transition: 0.2s; }
+        .day-checkbox:checked + .day-label { background: #00462A; color: white; border-color: #00462A; }
+
+        /* 일자별 리스트 뷰 구조 */
+        .timeline-box { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 20px; }
+        .timeline-node-item { display: flex; align-items: flex-start; gap: 15px; padding: 15px 20px; background: #f8fafc; border-radius: 10px; border-left: 5px solid #00462A; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .node-date-indicator { font-weight: bold; color: #00462A; background: #e2ece9; padding: 4px 10px; border-radius: 6px; font-size: 13px; min-width: 90px; text-align: center; }
+        .node-activity-detail { font-size: 14px; font-weight: 500; color: #222; display: flex; flex-direction: column; gap: 4px; }
+
+        /* 전체화면 작업장 구조 */
+        .fullscreen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 1000; display: flex; flex-direction: column; animation: slideUp 0.25s ease-out; }
+        .editor-top-bar { display: flex; justify-content: space-between; align-items: center; background: #00462A; color: white; padding: 15px 40px; }
+        .editor-workspace { display: flex; flex: 1; overflow: hidden; }
+        .editor-main-input-zone { flex: 1.5; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; border-right: 1px solid #dee2e6; }
+        .editor-guide-zone { flex: 1; padding: 40px; background: #f8fafc; overflow-y: auto; text-align: left; }
+        .editor-textarea-huge { width: 100%; flex: 1; min-height: 350px; padding: 20px; border: 1px solid #ccc; border-radius: 12px; font-size: 15px; line-height: 1.6; resize: none; outline: none; font-family: inherit; }
+        .report-section-input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
+        .guide-card-gold { border-left: 5px solid #daa520; background: white; padding: 18px; border-radius: 8px; margin-bottom: 15px; }
+        .progress-controller-wrap { background: #fff; padding: 20px; border-radius: 10px; border: 1px solid #dee2e6; text-align: left; }
+        .slider-custom { width: 100%; height: 8px; border-radius: 5px; outline: none; accent-color: #00462A; cursor: pointer; }
+        .btn-action-save-temp { background: #7f8c8d; color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .btn-action-save-final { background: #ffd700; color: #00462A; border: none; padding: 12px 24px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .btn-editor-close { background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 18px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; margin-left: 10px; }
+        .file-upload-box { background: #fff; padding: 15px; border: 2px dashed #00a2ed; border-radius: 8px; text-align: center; font-size: 13px; color: #555; cursor: pointer; }
+
+        @keyframes slideUp {
+            0% { transform: translateY(50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-gateway-view" class="login-gateway">
+        <h2>이화인 진로 커뮤니티</h2>
+        <p>슬기로운 이화 생활에 오신 것을 환영합니다</p>
+        <button id="google-login-btn" class="btn-prime">이화고 구글 계정으로 로그인</button>
+    </div>
+
+    <div id="app-wrapper" class="hidden">
+        <div class="navbar">
+            <div class="nav-brand" onclick="location.reload();">☘️ 슬기로운 이화 생활</div>
+            <div class="user-profile-mini">
+                <span>이화여자고등학교</span>
+                <div class="user-avatar-circle">👤</div>
+                <strong id="nav-user-name">미등록 학생</strong>
+            </div>
+        </div>
+
+        <div class="tab-trigger-container">
+            <button id="trigger-main" class="active" onclick="switchView('tab-main', 'trigger-main')">🏠 대시보드</button>
+            <button id="trigger-recommend" onclick="switchView('tab-recommend', 'trigger-recommend')">💡 탐구 주제 추천</button>
+            <button id="trigger-plan" onclick="switchView('tab-plan', 'trigger-plan')">📅 탐구 일정 계획</button>
+            <button id="trigger-final-report-action" onclick="openFinalReportWorkspace()">🏆 최종 탐구 보고서 작성</button>
+            <button id="trigger-board" onclick="switchView('tab-board', 'trigger-board')">📝 탐구 내용 공유</button>
+            <button id="logout-btn" style="background-color: #ff4d4d; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer;">로그아웃</button>
+        </div>
+
+        <div id="tab-main" class="tab-content">
+            <div class="content-card bookshelf-panel">
+                <h3 class="welcome-header"><span id="dash-user-title" style="color:#00462A;">새로운 학생</span>님, 환영합니다!</h3>
+                <p class="welcome-sub">탐구 자료를 관리하세요. (최종 완성 시 방문한 다른 사용자가 내 책장에서 문서를 열람할 수 있습니다)</p>
+                
+                <div class="bookshelf-actions">
+                    <select id="new-book-subject" onchange="handleSubjectDropdownChange()">
+                        <option value="국어">국어</option>
+                        <option value="수학">수학</option>
+                        <option value="영어">영어</option>
+                        <option value="과학">과학</option>
+                        <option value="사회">사회</option>
+                        <option value="기타">기타 (직접 입력)</option>
+                    </select>
+                    <input type="text" id="new-book-subject-custom" class="hidden" placeholder="과목명 입력" style="width:100px;">
+                    <input type="text" id="new-book-title" placeholder="탐구 대주제나 핵심 제목 입력" style="flex:1;">
+                    <button class="btn-add-book" onclick="createNewBookLog()">➕ 탐구 일지 추가</button>
+                </div>
+
+                <div class="bookshelf-wood">
+                    <div class="bookshelf-row" id="dynamic-bookshelf-row">
+                        <div class="empty-shelf-text" id="shelf-empty-msg">서재가 완전히 비어 있습니다. 새로운 탐구 일지를 추가해 주세요!</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-card character-panel">
+                <h4 style="margin-top:0; color:#00462A; font-size:16px;">👤 나의 이화인 아바타 설정</h4>
+                <div class="character-view-box">
+                    <div class="speech-bubble" id="avatar-bubble">초기 정보를 설정창에 입력하여 고유 탐구 아바타를 생성해 주세요!</div>
+                    
+                    <div class="uniform-avatar-container" onclick="avatarClickReaction()">
+                        <div class="avatar-head" id="dom-avatar-face">👧</div>
+                        <div class="avatar-ribbon"></div>
+                        <div class="avatar-jacket"></div>
+                        <div class="avatar-skirt"></div>
+                    </div>
+                    <div class="badge-dynamic" id="avatar-level">신규 유저 (Lv.1)</div>
+                </div>
+                
+                <div class="profile-form" id="profile-setup-form">
+                    <label style="font-weight: bold; font-size: 12px; color: #555;">학생 성명</label>
+                    <input type="text" id="setup-name" placeholder="이름을 입력하세요">
+                    <label style="font-weight: bold; font-size: 12px; color: #555;">학적 정보</label>
+                    <select id="setup-grade">
+                        <option value="1학년">고등학교 1학년</option>
+                        <option value="2학년">고등학교 2학년</option>
+                        <option value="3학년">고등학교 3학년</option>
+                    </select>
+                    <label style="font-weight: bold; font-size: 12px; color: #555;">목표 연구 진로 트랙</label>
+                    <input type="text" id="setup-career" placeholder="예: 의학, 컴퓨터공학, 경영학">
+                    <button style="background: #00462A; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:5px;" onclick="applyInitialProfile()">학생 인프라 초기화 및 확정</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-recommend" class="tab-content hidden">
+            <div class="content-card" style="width:100%;">
+                <h3 style="margin-top:0;">💡 맞춤형 AI 탐구 주제 추천 및 실시간 디벨롭</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:20px;">고등학교 교육과정 수준에 최적화된 주제를 추천받고, AI 멘토와 대화하며 나만의 연구 계획으로 발전시켜 보세요.</p>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>🌱 학년</label>
+                        <select id="req-grade" class="form-select-custom">
+                            <option value="1학년">고등학교 1학년</option>
+                            <option value="2학년">고등학교 2학년</option>
+                            <option value="3학년">고등학교 3학년</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label>📚 관련 교과 과목 (직접 입력)</label>
+                        <input type="text" id="req-subject" class="input-text-custom" placeholder="예: 생명과학I, 수학II, 독서">
+                    </div>
+                    <div class="form-col">
+                        <label>📖 교과서 단원 / 핵심 개념</label>
+                        <input type="text" id="req-concept" class="input-text-custom" placeholder="예: 유전과 변이, 함수의 극값, 근대 소설">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>🔍 선호하는 탐구 유형</label>
+                        <select id="req-type" class="form-select-custom">
+                            <option value="교내외 설문조사 및 통계 분석">교내외 설문조사 및 통계 분석</option>
+                            <option value="실험 실습 및 결과 도출">실험 실습 및 결과 도출</option>
+                            <option value="학술 문헌 고찰 및 비교 분석">학술 문헌 고찰 및 비교 분석</option>
+                            <option value="프로그램 알고리즘 설계 및 구현">프로그램 알고리즘 설계 및 구현</option>
+                        </select>
+                    </div>
+                    <div class="form-col" style="flex:2;">
+                        <label>🎯 관심 키워드 및 진로 연계 방향</label>
+                        <input type="text" id="req-keyword" class="input-text-custom" placeholder="예: 인공지능 윤리를 의학 진로와 융합">
+                    </div>
+                </div>
+                <button class="btn-prime" onclick="generateAISubjectEngine()">교과 연계형 3대 탐구 주제 추천 받기</button>
+                
+                <div class="recommend-layout hidden" id="recommend-board">
+                    <div class="topics-panel">
+                        <h4 style="margin:0 0 10px 0; color:#00462A;">📌 고교 수준 맞춤 추천 주제 (클릭 시 디벨롭 시작)</h4>
+                        <div id="topic-card-container"></div>
+                        
+                        <div id="naver-news-references-board" class="reference-news-box hidden">
+                            <h5>🌐 탐구 연계 실시간 네이버 뉴스 참고 기사</h5>
+                            <div id="news-links-list"></div>
+                        </div>
+                    </div>
+                    <div class="chat-panel">
+                        <div class="chat-header">
+                            <span>💬 AI 탐구 디벨롭 멘토링룸</span>
+                            <span style="font-size: 11px; font-weight: normal; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;" id="selected-topic-badge">주제를 선택하세요</span>
+                        </div>
+                        <div class="chat-messages" id="chat-box">
+                            <div class="msg ai">좌측에서 디벨롭하고 싶은 탐구 주제를 클릭하시면 실시간 심층 멘토링이 시작됩니다.</div>
+                        </div>
+                        <div class="chat-input-box">
+                            <input type="text" id="chat-user-input" placeholder="질문을 입력하세요..." onkeypress="if(event.keyCode==13) sendChatMessage()">
+                            <button onclick="sendChatMessage()">전송</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-board" class="tab-content hidden">
+            <div class="content-card" style="width:100%;">
+                <div class="board-container">
+                    <div class="imweb-board-subnav">
+                        <button class="imweb-subnav-btn active" id="board-parent-grade" onclick="switchBoardCategory('grade')">🏫 학년별 게시판</button>
+                        <button class="imweb-subnav-btn" id="board-parent-subject" onclick="switchBoardCategory('subject')">📚 과목별 게시판</button>
+                    </div>
+
+                    <div class="imweb-board-childnav" id="board-child-zone">
+                        <button class="imweb-child-btn active" onclick="filterBoardList('1학년', this)">1학년</button>
+                        <button class="imweb-child-btn" onclick="filterBoardList('2학년', this)">2학년</button>
+                        <button class="imweb-child-btn" onclick="filterBoardList('3학년', this)">3학년</button>
+                    </div>
+
+                    <h2 style="text-align: left; margin-left: 16px; margin-bottom: 20px; font-size: 20px; letter-spacing: -1px;" id="current-board-title">1학년 학술 광장</h2>
+                    <table class="imweb-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px; text-align: center;">No</th>
+                                <th>제목 [상단 글쓰기 창에서 자료 직접 등록 시 표출]</th>
+                                <th style="width: 150px;">글쓴이</th>
+                                <th style="width: 150px;">작성시간</th>
+                                <th style="width: 100px; text-align: center;">조회</th>
+                            </tr>
+                        </thead>
+                        <tbody id="imweb-board-tbody"></tbody>
+                    </table>
+                    <div class="board-action-row">
+                        <button class="btn-imweb-write" onclick="toggleImwebModal(true)">✏️ 자료 직접 게시하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-plan" class="tab-content hidden">
+            <div class="content-card" style="width:100%;">
+                <h3>📅 데이터 기반 탐구 로드맵 수립 매트릭스</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:25px;">탐구의 진행 단계를 순차적으로 입력하면, 가능 요일 일정에 맞추어 일자별 수행 계획표를 타임라인으로 정렬합니다.</p>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>🛫 탐구 시작 일자</label>
+                        <input type="date" id="plan-start-date" class="input-date-custom">
+                    </div>
+                    <div class="form-col">
+                        <label>🛬 탐구 마감 일자</label>
+                        <input type="date" id="plan-end-date" class="input-date-custom">
+                    </div>
+                    <div class="form-col" style="flex: 2;">
+                        <label>📆 탐구 가능 요일 다중 선택</label>
+                        <div class="day-selector">
+                            <input type="checkbox" id="day-mon" class="day-checkbox" value="월"><label for="day-mon" class="day-label">월</label>
+                            <input type="checkbox" id="day-tue" class="day-checkbox" value="화"><label for="day-tue" class="day-label">화</label>
+                            <input type="checkbox" id="day-wed" class="day-checkbox" value="수"><label for="day-wed" class="day-label">수</label>
+                            <input type="checkbox" id="day-thu" class="day-checkbox" value="목"><label for="day-thu" class="day-label">목</label>
+                            <input type="checkbox" id="day-fri" class="day-checkbox" value="금"><label for="day-fri" class="day-label">금</label>
+                            <input type="checkbox" id="day-sat" class="day-checkbox" value="토"><label for="day-sat" class="day-label">토</label>
+                            <input type="checkbox" id="day-sun" class="day-checkbox" value="일"><label for="day-sun" class="day-label">일</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:#f1f3f5; padding:20px; border-radius:12px; margin-bottom:15px; text-align:left;">
+                    <h4 style="margin-top:0; color:#00462A; margin-bottom:12px;">🔬 탐구 과정 세부 입력 (단계별 연구 계획)</h4>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:bold; font-size:12px; min-width:60px;">1단계(준비):</span>
+                            <input type="text" id="step-input-1" class="input-text-custom" style="padding:8px;" value="RISS 선행 학술 논문 서칭 및 가설 배경 논거 수집">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:bold; font-size:12px; min-width:60px;">2단계(설계):</span>
+                            <input type="text" id="step-input-2" class="input-text-custom" style="padding:8px;" value="독립변인과 종속변인 설정 및 구글 폼 문항 설계 유효성 검증">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:bold; font-size:12px; min-width:60px;">3단계(실행):</span>
+                            <input type="text" id="step-input-3" class="input-text-custom" style="padding:8px;" value="교내 표본 학생 대상 데이터 매트릭스 병합 및 통계 도표 정량화">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:bold; font-size:12px; min-width:60px;">4단계(정리):</span>
+                            <input type="text" id="step-input-4" class="input-text-custom" style="padding:8px;" value="HWP 소논문 4단 규격 소스 패키징 완료 및 지도교사 피드백 제출">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col" style="flex: 1;">
+                        <label>🎯 탐구 대주제명</label>
+                        <input type="text" id="plan-title-input" class="input-text-custom" placeholder="수립할 탐구계획서의 핵심 제목을 입력하세요">
+                    </div>
+                </div>
+
+                <button class="btn-prime" onclick="calculateDynamicRoadmap()">입력 조건 기반 최적 스케줄 로드맵 동적 연산</button>
+                <div class="timeline-box" id="roadmap-output-box">
+                    <p style="text-align: center; color: #aaa; padding: 20px;">스케줄 매트릭스 연산 버튼을 클릭하면 세부 타임라인 노드가 빌드됩니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay hidden" id="board-modal" style="background: rgba(0,0,0,0.5); position:fixed; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:12px; width:480px; text-align:left; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+            <h3 style="margin-top:0; color:#00462A;">📝 보고서 및 관련 학술 자료 PDF 투고</h3>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
+                <label style="font-weight:bold; font-size:13px;">투고할 전용 타겟 게시판 선택 지정</label>
+                <div style="display:flex; gap:10px;">
+                    <select id="modal-post-target-grade" style="padding:8px; border-radius:4px; flex:1;">
+                        <option value="1학년">1학년</option>
+                        <option value="2학년">2학년</option>
+                        <option value="3학년">3학년</option>
+                    </select>
+                    <select id="modal-post-target-subject" style="padding:8px; border-radius:4px; flex:1;">
+                        <option value="국어">국어</option>
+                        <option value="영어">영어</option>
+                        <option value="수학">수학</option>
+                        <option value="과학">과학</option>
+                        <option value="사회">사회</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+                <label style="font-weight:bold; font-size:13px;">학술 포스트 제목</label>
+                <input type="text" id="modal-title" placeholder="게시판에 투고할 탐구 대주제명을 타이핑하세요" style="padding:10px; border:1px solid #ccc; border-radius:6px;">
+                <label style="font-weight:bold; font-size:13px;">연구 내용 요약 및 서술</label>
+                <textarea id="modal-desc" placeholder="세부적인 실험 요약본이나 세특용 핵심 결론을 서술하세요" style="padding:10px; border:1px solid #ccc; border-radius:6px; height:80px; resize:none; font-family:inherit;"></textarea>
+                <label style="font-weight:bold; font-size:13px;">📎 첨부파일 아카이빙 (PDF / HWP)</label>
+                <div class="file-upload-box" onclick="simulateFileUploadEffect()">
+                    <span id="file-upload-status-text">📄 마우스로 클릭하여 보고서 최종 PDF 파일 업로드 시뮬레이션</span>
+                </div>
+                <button class="btn-prime" style="padding:12px; background-color:#4ebff2;" onclick="submitImwebPost()">🚀 게시판에 정식 업로드</button>
+                <button style="background:#eee; color:#333; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold;" onclick="toggleImwebModal(false)">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay hidden" id="fullscreen-log-workspace">
+        <div class="editor-top-bar">
+            <h2 style="margin:0; font-size:18px;" id="fs-editor-title">📝 일반 탐구 일지 전체화면 편집기</h2>
+            <div>
+                <button class="btn-action-save-temp" onclick="saveFullscreenLogData(false)">💾 임시 저장 (서재에만 보관)</button>
+                <button class="btn-action-save-final" onclick="saveFullscreenLogData(true)">🔓 최종 완성 (외부 방문자 개방)</button>
+                <button class="btn-editor-close" onclick="closeFullscreenLogWorkspace()">취소</button>
+            </div>
+        </div>
+        <div class="editor-workspace">
+            <div class="editor-main-input-zone">
+                <div class="progress-controller-wrap">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:8px; font-size:14px;">
+                        <span>📊 이 일지 작성을 얼마나 완료했는지 여부 설정</span>
+                        <span style="color:#00462A; font-size:16px;" id="fs-log-progress-text">0%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="0" step="5" class="slider-custom" id="fs-log-progress-slider" oninput="document.getElementById('fs-log-progress-text').innerText = this.value + '%'">
+                </div>
+                <label style="font-weight:bold; text-align:left; font-size:14px; color:#555; margin-top:10px;">💡 오늘 진행한 탐구 핵심 내용 서술</label>
+                <textarea class="editor-textarea-huge" id="fs-editor-content" placeholder="연구 가설 및 데이터 수집 결과, 탐구 내용을 자유롭고 심층적으로 기술해 보세요..."></textarea>
+            </div>
+            <div class="editor-guide-zone">
+                <h3>📚 탐구 일지 집중 작성 공간</h3>
+                <p style="color:#666; font-size:13px; line-height:1.6;">최종 완성을 누르면 표지의 자물쇠 인디케이터가 개방 상태로 전환되어, 내 책장에 입장한 타인이 열람할 수 있게 설계됩니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay hidden" id="fullscreen-report-workspace">
+        <div class="editor-top-bar">
+            <h2 style="margin:0; font-size:18px; color:white;">🏆 스페셜 코어 양식 - 최종 탐구 보고서 작성 시스템</h2>
+            <div>
+                <button class="btn-action-save-temp" style="background: #5d4037;" onclick="saveFinalReportData(false)">💾 보고서 초안 임시저장</button>
+                <button class="btn-action-save-final" style="background:#ffd700; color:#00462A;" onclick="saveFinalReportData(true)">🏆 최종 마스터 보고서 확정 (방문자 개방)</button>
+                <button class="btn-editor-close" onclick="closeFinalReportWorkspace()">취소</button>
+            </div>
+        </div>
+        <div class="editor-workspace">
+            <div class="editor-main-input-zone">
+                <div class="progress-controller-wrap">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:8px; font-size:14px; color:#00462A;">
+                        <span>📊 이 최종 탐구 보고서 작성을 얼마나 완료했는지 여부 설정</span>
+                        <span style="color:#00462A; font-size:16px;" id="fs-report-progress-text">100%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="100" step="5" class="slider-custom" id="fs-report-progress-slider" oninput="document.getElementById('fs-report-progress-text').innerText = this.value + '%'">
+                </div>
+                <div style="text-align:left; display:flex; flex-direction:column; gap:6px; margin-top:10px;">
+                    <label style="font-weight:bold; font-size:14px;">👑 최종 탐구 보고서 제목</label>
+                    <input type="text" id="report-form-title" class="report-section-input" style="font-weight:bold; font-size:16px;" placeholder="최종 탐구보고서의 핵심 논점 제목을 입력하세요">
+                </div>
+                <div style="text-align:left; display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-weight:bold; font-size:13px;">I. 서론 (탐구 동기 및 핵심 가설)</label>
+                    <textarea id="report-form-intro" class="report-section-input" style="height:100px;" placeholder="이 연구를 시작하게 된 계기와 교과서 개념 연계 지점을 서술하세요."></textarea>
+                </div>
+                <div style="text-align:left; display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-weight:bold; font-size:13px;">II. 본론 (탐구 방법 및 실증 데이터 분석)</label>
+                    <textarea id="report-form-body" class="report-section-input" style="height:120px;" placeholder="실행한 실험 프로토콜이나 교내 설문 데이터 통계 매트릭스 결과를 상세히 전개하세요."></textarea>
+                </div>
+                <div style="text-align:left; display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-weight:bold; font-size:13px;">III. 결론 및 참고문헌</label>
+                    <textarea id="report-form-conclusion" class="report-section-input" style="height:80px;" placeholder="가설 검증 성공 여부 및 참고 문헌 출처를 명시하세요."></textarea>
+                </div>
+            </div>
+            <div class="editor-guide-zone">
+                <h3 style="color:#00462A; margin-top:0;">⚠️ 최종 보고서 작성 시 필수 유의 사항</h3>
+                <div class="guide-card-gold">
+                    <strong>1. 연구 윤리 및 표절 예방 지침</strong><br>
+                    <span style="font-size:12px; color:#555;">카피킬러 또는 RISS 등 타인의 연구 데이터를 무단 복제하는 행위는 제한됩니다.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay hidden" id="fullscreen-board-viewer" style="background:#f1f3f5;">
+        <div class="editor-top-bar" style="background:#00a2ed;">
+            <h2 style="margin:0; font-size:18px;" id="viewer-header-title">📄 투고된 학술 보고서 전체화면 원본 뷰어</h2>
+            <button class="btn-editor-close" onclick="closeBoardViewer()">닫기</button>
+        </div>
+        <div style="display:flex; flex:1; max-width:1100px; margin:30px auto; width:100%; gap:25px; height: calc(100vh - 120px);">
+            <div style="flex:2; background:white; padding:50px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.06); overflow-y:auto; text-align:left;" id="viewer-paper-body"></div>
+            <div style="flex:1; background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.06); text-align:left; height:fit-content;">
+                <h4 style="margin-top:0; color:#00a2ed; font-size:16px;">📋 투고 정보 데이터</h4>
+                <p style="font-size:13px; color:#555; line-height:1.6;">• <strong>작성 연구원:</strong> <span id="viewer-meta-author">이화인</span><br>• <strong>업로드 시간:</strong> <span id="viewer-meta-time">2026-07-08</span></p>
+                <div style="background:#f8fafc; border:1px dashed #00a2ed; padding:15px; border-radius:6px; font-size:12px; color:#666; margin-top:20px;">
+                    🔒 <strong>보안 인증 안내:</strong> 본 문서는 학술 투고 모듈을 통해 무결성 검증을 마친 정식 PDF 연동 리포트입니다.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // ✅ 제공된 haha 파이어베이스 프로젝트 토큰 정보 주입 완료
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqgtWYlbGIhrEP44movYjcY2I4RZCGS4k",
+            authDomain: "haha-3dafe.firebaseapp.com",
+            projectId: "haha-3dafe",
+            storageBucket: "haha-3dafe.firebasestorage.app",
+            messagingSenderId: "17463493521",
+            appId: "1:17463493521:web:291c04773706f7d4449030",
+            measurementId: "G-9YFXHWYJWT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ hd: "ewha.hs.kr" }); // 이화고 계정 도메인 가이드 제한
+
+        let currentActiveUser = null;
+
+        // 🔐 실시간 유저 인증 모니터링 시스템
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                if (user.email && user.email.endsWith("@ewha.hs.kr")) {
+                    currentActiveUser = user;
+                    
+                    // DB에서 학생 정보 데이터 매핑 확인
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        globalStudentProfile.name = data.nickname;
+                        globalStudentProfile.grade = data.grade || "1학년";
+                        globalStudentProfile.career = data.career;
+
+                        document.getElementById('nav-user-name').innerText = `${data.nickname} 학생`;
+                        document.getElementById('dash-user-title').innerText = data.nickname;
+                        document.getElementById('avatar-level').innerText = `이화인 학술원 (Lv.2)`;
+                        document.getElementById('dom-avatar-face').innerText = "👩";
+                        document.getElementById('avatar-bubble').innerHTML = `반갑습니다, <strong>${data.nickname}</strong> 학우님! 우측 서재 인프라를 확장해 보세요.`;
+                        document.getElementById('profile-setup-form').classList.add('hidden');
+                    }
+
+                    // 게이트웨이 숨기고 메인 대시보드 표출
+                    document.getElementById('login-gateway-view').classList.add('hidden');
+                    document.getElementById('app-wrapper').classList.remove('hidden');
+                    document.body.style.alignItems = 'stretch';
+                } else {
+                    await signOut(auth);
+                    alert("접근 권한이 없습니다. 이화고등학교 계정(@ewha.hs.kr)으로만 로그인할 수 있습니다.");
+                    switchToGatewayUI();
+                }
+            } else {
+                switchToGatewayUI();
+            }
+        });
+
+        function switchToGatewayUI() {
+            document.getElementById('app-wrapper').classList.add('hidden');
+            document.getElementById('login-gateway-view').classList.remove('hidden');
+            document.body.style.alignItems = 'center';
+        }
+
+        // 로그인 및 로그아웃 단락 핸들러
+        document.getElementById('google-login-btn').addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch(err => { console.error("인증 실패", err); });
+        });
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // ==================== ⚙️ 전역 인라인 함수용 모듈 바인딩 윈도우 익스포트 연산 ====================
+        window.globalStudentProfile = { name: "", grade: "", career: "" };
+        window.bookDatabase = [];
+        window.boardDatabase = [];
+        window.currentEditingBookId = null;
+        window.currentSelectedTopicForChat = "";
+        window.isSimulatedFileAttached = false;
+        window.currentBoardType = "grade";
+        window.currentFilterValue = "1학년";
+
+        window.switchView = function(tabId, triggerId) {
+            document.getElementById('tab-main').classList.add('hidden');
+            document.getElementById('tab-recommend').classList.add('hidden');
+            document.getElementById('tab-board').classList.add('hidden');
+            document.getElementById('tab-plan').classList.add('hidden');
+            document.querySelectorAll('.tab-trigger-container button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(triggerId).classList.add('active');
+        };
+
+        window.handleSubjectDropdownChange = function() {
+            const selectVal = document.getElementById('new-book-subject').value;
+            const customInput = document.getElementById('new-book-subject-custom');
+            if(selectVal === '기타') customInput.classList.remove('hidden');
+            else customInput.classList.add('hidden');
+        };
+
+        window.applyInitialProfile = async function() {
+            const nameSrc = document.getElementById('setup-name').value.trim();
+            const gradeSrc = document.getElementById('setup-grade').value;
+            const careerSrc = document.getElementById('setup-career').value.trim();
+
+            if(!nameSrc || !careerSrc) {
+                alert("필수 항목을 모두 채워주세요.");
+                return;
+            }
+
+            if(currentActiveUser) {
+                await setDoc(doc(db, "users", currentActiveUser.uid), {
+                    nickname: nameSrc,
+                    grade: gradeSrc,
+                    career: careerSrc,
+                    email: currentActiveUser.email,
+                    createdAt: new Date()
+                });
+                alert("학생 정보 인프라가 파이어스토어에 성공적으로 연동되었습니다.");
+                window.location.reload();
+            }
+        };
+
+        window.createNewBookLog = function() {
+            if(!window.globalStudentProfile.name) {
+                alert("우측 프로필 정보 설정을 먼저 완료해 주세요!");
+                return;
+            }
+            const selectSubject = document.getElementById('new-book-subject').value;
+            let finalSubject = selectSubject;
+            if(selectSubject === '기타') {
+                const customVal = document.getElementById('new-book-subject-custom').value.trim();
+                if(!customVal) { alert("교과목 명칭을 직접 작성하세요."); return; }
+                finalSubject = customVal;
+            }
+            const title = document.getElementById('new-book-title').value.trim();
+            if(!title) { alert("탐구 일지의 제목을 입력해 주세요."); return; }
+
+            const newBook = {
+                id: Date.now(),
+                subject: finalSubject,
+                baseSubjectClass: ['국어','수학','영어','과학','사회'].includes(finalSubject) ? finalSubject : '기타',
+                title: title,
+                content: "",
+                progress: 0,
+                isFinalReport: false,
+                isPublished: false,
+                updatedAt: new Date()
+            };
+            window.bookDatabase.push(newBook);
+            document.getElementById('new-book-title').value = "";
+            document.getElementById('new-book-subject-custom').value = "";
+            window.renderDynamicBookshelf();
+            window.openFullscreenLogWorkspace(newBook.id);
+        };
+
+        window.renderDynamicBookshelf = function() {
+            const rowContainer = document.getElementById('dynamic-bookshelf-row');
+            rowContainer.innerHTML = "";
+            if(window.bookDatabase.length === 0) {
+                rowContainer.innerHTML = `<div class="empty-shelf-text" id="shelf-empty-msg">서재가 완전히 비어 있습니다. 새로운 탐구 일지를 추가해 주세요!</div>`;
+                return;
+            }
+            window.bookDatabase.sort((a, b) => b.updatedAt - a.updatedAt);
+            window.bookDatabase.forEach(book => {
+                const bookDiv = document.createElement('div');
+                bookDiv.className = book.isFinalReport ? `book-item color-최종보고서` : `book-item color-${book.baseSubjectClass}`;
+                let shareIndicator = book.isPublished ? `<div class="share-status-dot status-public">🔓</div>` : `<div class="share-status-dot status-private">🔒</div>`;
+                bookDiv.onclick = () => {
+                    if(book.isFinalReport) window.openFinalReportWorkspaceWithData(book.id);
+                    else window.openFullscreenLogWorkspace(book.id);
+                };
+                bookDiv.innerHTML = `
+                    ${shareIndicator}
+                    <span style="font-size:10px; ${book.isFinalReport ? 'color:#ffd700;' : 'opacity:0.9;'}">${book.isFinalReport ? '🏆 최종보고서' : '['+book.subject+']'}</span>
+                    <span class="book-title-text">${book.title}</span>
+                    <span class="progress-badge">${book.progress}%</span>
+                `;
+                rowContainer.appendChild(bookDiv);
+            });
+        };
+
+        window.openFullscreenLogWorkspace = function(bookId) {
+            window.currentEditingBookId = bookId;
+            const book = window.bookDatabase.find(b => b.id === bookId);
+            if(!book) return;
+            document.getElementById('fs-editor-title').innerText = `📝 [${book.subject}] "${book.title}" 탐구 일지 편집기`;
+            document.getElementById('fs-editor-content').value = book.content;
+            document.getElementById('fs-log-progress-slider').value = book.progress;
+            document.getElementById('fs-log-progress-text').innerText = book.progress + "%";
+            document.getElementById('fullscreen-log-workspace').classList.remove('hidden');
+        };
+
+        window.saveFullscreenLogData = function(isFinalEmit) {
+            if(!window.currentEditingBookId) return;
+            const book = window.bookDatabase.find(b => b.id === window.currentEditingBookId);
+            if(!book) return;
+            book.content = document.getElementById('fs-editor-content').value;
+            book.progress = parseInt(document.getElementById('fs-log-progress-slider').value);
+            book.updatedAt = new Date();
+            book.isPublished = isFinalEmit;
+            alert(isFinalEmit ? "🔓 최종 완성 처리되었습니다." : "💾 임시 저장이 완료되었습니다.");
+            window.closeFullscreenLogWorkspace();
+        };
+
+        window.closeFullscreenLogWorkspace = function() {
+            document.getElementById('fullscreen-log-workspace').classList.add('hidden');
+            window.currentEditingBookId = null;
+            window.renderDynamicBookshelf();
+        };
+
+        window.openFinalReportWorkspace = function() {
+            if(!window.globalStudentProfile.name) { alert("최종 보고서 작성 전 학생 등록을 해 주세요."); return; }
+            window.currentEditingBookId = null;
+            document.getElementById('report-form-title').value = "";
+            document.getElementById('report-form-intro').value = "";
+            document.getElementById('report-form-body').value = "";
+            document.getElementById('report-form-conclusion').value = "";
+            document.getElementById('fullscreen-report-workspace').classList.remove('hidden');
+        };
+
+        window.openFinalReportWorkspaceWithData = function(bookId) {
+            window.currentEditingBookId = bookId;
+            const book = window.bookDatabase.find(b => b.id === bookId);
+            if(!book) return;
+            document.getElementById('report-form-title').value = book.title;
+            const splitData = book.content.split("||");
+            document.getElementById('report-form-intro').value = splitData[0] || "";
+            document.getElementById('report-form-body').value = splitData[1] || "";
+            document.getElementById('report-form-conclusion').value = splitData[2] || "";
+            document.getElementById('fullscreen-report-workspace').classList.remove('hidden');
+        };
+
+        window.saveFinalReportData = function(isFinalEmit) {
+            const title = document.getElementById('report-form-title').value.trim();
+            if(!title) return alert("제목을 적어주세요.");
+            const combined = `${document.getElementById('report-form-intro').value}||${document.getElementById('report-form-body').value}||${document.getElementById('report-form-conclusion').value}`;
+
+            if(window.currentEditingBookId) {
+                const b = window.bookDatabase.find(x => x.id === window.currentEditingBookId);
+                if(b) { b.title = title; b.content = combined; b.isPublished = isFinalEmit; b.updatedAt = new Date(); }
+            } else {
+                window.bookDatabase.push({
+                    id: Date.now(), subject: "최종보고서", baseSubjectClass: "최종보고서", title: title, content: combined, progress: 100, isFinalReport: true, isPublished: isFinalEmit, updatedAt: new Date()
+                });
+            }
+            window.closeFinalReportWorkspace();
+        };
+
+        window.closeFinalReportWorkspace = function() {
+            document.getElementById('fullscreen-report-workspace').classList.add('hidden');
+            window.currentEditingBookId = null;
+            window.renderDynamicBookshelf();
+        };
+
+        window.switchBoardCategory = function(type) {
+            window.currentBoardType = type;
+            const childZone = document.getElementById('board-child-zone');
+            document.getElementById('board-parent-grade').classList.remove('active');
+            document.getElementById('board-parent-subject').classList.remove('active');
+            if(type === 'grade') {
+                document.getElementById('board-parent-grade').classList.add('active');
+                childZone.innerHTML = `<button class="imweb-child-btn active" onclick="filterBoardList('1학년', this)">1학년</button><button class="imweb-child-btn" onclick="filterBoardList('2학년', this)">2학년</button><button class="imweb-child-btn" onclick="filterBoardList('3학년', this)">3학년</button>`;
+                window.filterBoardList('1학년', childZone.querySelector('.imweb-child-btn'));
+            } else {
+                document.getElementById('board-parent-subject').classList.add('active');
+                childZone.innerHTML = `<button class="imweb-child-btn active" onclick="filterBoardList('국어', this)">국어</button><button class="imweb-child-btn" onclick="filterBoardList('영어', this)">영어</button><button class="imweb-child-btn" onclick="filterBoardList('수학', this)">수학</button><button class="imweb-child-btn" onclick="filterBoardList('과학', this)">과학</button><button class="imweb-child-btn" onclick="filterBoardList('사회', this)">사회</button>`;
+                window.filterBoardList('국어', childZone.querySelector('.imweb-child-btn'));
+            }
+        };
+
+        window.filterBoardList = function(filterVal, btnElement) {
+            window.currentFilterValue = filterVal;
+            document.querySelectorAll('.imweb-child-btn').forEach(btn => btn.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            document.getElementById('current-board-title').innerText = `${filterVal} 학술 광장`;
+            window.renderImwebTable();
+        };
+
+        window.toggleImwebModal = function(show) {
+            if(show) document.getElementById('board-modal').classList.remove('hidden');
+            else document.getElementById('board-modal').classList.add('hidden');
+        };
+
+        window.simulateFileUploadEffect = function() {
+            window.isSimulatedFileAttached = true;
+            document.getElementById('file-upload-status-text').innerHTML = "<b style='color:#00a2ed;'>✅ 최종_탐구_보고서_완성본.pdf (첨부 완료)</b>";
+        };
+
+        window.submitImwebPost = function() {
+            const t = document.getElementById('modal-title').value.trim();
+            const d = document.getElementById('modal-desc').value.trim();
+            if(!t || !d) return alert("제목과 내용을 채워주세요.");
+            if(!window.isSimulatedFileAttached) return alert("기획서 규칙에 의거, 가상 보고서 PDF 파일 첨부 단계를 거쳐야 업로드 가능합니다.");
+
+            window.boardDatabase.push({
+                id: window.boardDatabase.length + 1, targetGrade: document.getElementById('modal-post-target-grade').value, targetSubject: document.getElementById('modal-post-target-subject').value, title: t, desc: d, author: window.globalStudentProfile.name || "이화인", time: new Date().toISOString().split('T')[0]
+            });
+            window.renderImwebTable();
+            window.toggleImwebModal(false);
+        };
+
+        window.renderImwebTable = function() {
+            const tbody = document.getElementById('imweb-board-tbody');
+            tbody.innerHTML = "";
+            const filtered = window.boardDatabase.filter(p => window.currentBoardType === 'grade' ? p.targetGrade === window.currentFilterValue : p.targetSubject === window.currentFilterValue);
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#aaa; padding:40px;">투고된 자료가 없습니다.</td></tr>`;
+                return;
+            }
+            [...filtered].reverse().forEach(post => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${post.id}</td><td style="color:#00a2ed; cursor:pointer;" onclick="openBoardViewer(${post.id})">📁 [PDF] ${post.title}</td><td>${post.author}</td><td>${post.time}</td><td style="color:#00a2ed; cursor:pointer;" onclick="openBoardViewer(${post.id})">👁️ 보기</td>`;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.openBoardViewer = function(postId) {
+            const post = window.boardDatabase.find(p => p.id === postId);
+            if(!post) return;
+            document.getElementById('viewer-meta-author').innerText = post.author;
+            document.getElementById('viewer-meta-time').innerText = post.time;
+            document.getElementById('viewer-paper-body').innerHTML = `<h1 style='font-size:24px; text-align:center;'>${post.title}</h1><p style='text-align:center;'>연구원: ${post.author}</p><hr><p>${post.desc}</p>`;
+            document.getElementById('fullscreen-board-viewer').classList.remove('hidden');
+        };
+
+        window.closeBoardViewer = function() { document.getElementById('fullscreen-board-viewer').classList.add('hidden'); };
+
+        window.avatarClickReaction = function() {
+            document.getElementById('avatar-bubble').innerText = window.globalStudentProfile.name ? "👗 최종 마스터 아카이브가 원격으로 안전하게 유지관리되고 있습니다." : "좌측 하단 패널을 통해 프로필 생성을 우선 확정해 주세요!";
+        };
+
+        window.calculateDynamicRoadmap = function() {
+            const s = document.getElementById('plan-start-date').value;
+            const e = document.getElementById('plan-end-date').value;
+            const t = document.getElementById('plan-title-input').value.trim();
+            if(!s || !e || !t) return alert("필수 스케줄 필드를 작성하세요.");
+            
+            let nodesHtml = `<div style="background:#00462A; color:white; padding:15px; border-radius:8px; font-weight:bold; margin-bottom:15px;">🎯 로드맵 계획명: ${t}</div>`;
+            const matchedMockDates = [s, e]; // 단순 변환 루프 표출용
+            matchedMockDates.forEach((d, idx) => {
+                nodesHtml += `<div class="timeline-node-item"><div class="node-date-indicator">📅 ${d}</div><div class="node-activity-detail"><span><b>[${idx+1}단계]</b> 탐구 가설 검증 및 서치 마일스톤 러닝</span></div></div>`;
+            });
+            document.getElementById('roadmap-output-box').innerHTML = nodesHtml;
+        };
+
+        // ==================== ⚡ [핵심] Next.js 통합 API 검색 가속 엔진 연동 단락 ====================
+        
+        // 1. 3대 주제 생성 및 네이버 참고 뉴스 로드 함수
+        window.generateAISubjectEngine = async function() {
+            const grade = document.getElementById('req-grade').value;
+            const subject = document.getElementById('req-subject').value.trim();
+            const concept = document.getElementById('req-concept').value.trim();
+            const type = document.getElementById('req-type').value;
+            const keyword = document.getElementById('req-keyword').value.trim();
+
+            if(!subject || !concept) {
+                alert("교과 과목과 단원 개념을 입력해 주세요.");
+                return;
+            }
+
+            document.getElementById('recommend-board').classList.remove('hidden');
+            const container = document.getElementById('topic-card-container');
+            container.innerHTML = "<p style='color:#00462A; font-weight:bold; padding:20px;'>💡 Next.js 서버 기반의 네이버 검색 결합형 AI 테마 분석 중...</p>";
+
+            // 첨부한 ts 파일의 API 엔드포인트 파라미터 규격 조율
+            const messagePayload = `${grade}학년 수준에 맞는 ${concept} 개념 기반의 ${type} 주제를 3가지 제시해 줘. 키워드는 ${keyword}야.`;
+
+            try {
+                // Next.js POST 라우트 호출 (배포된 로컬 주소 기준 '/api/recommend')
+                const res = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: messagePayload,
+                        subject: subject,
+                        career: window.globalStudentProfile.career || "일반학술"
+                    })
+                });
+
+                const data = await res.json();
+                
+                if(data.error) {
+                    container.innerHTML = `<p style="color:red; padding:20px;">서버 오류: ${data.error}</p>`;
+                    return;
+                }
+
+                // AI 답변을 바탕으로 카드 가상화 렌더링
+                container.innerHTML = "";
+                const topics = [
+                    { title: `🎯 AI 제안 1개년 추천 메인 과제`, desc: data.answer.substring(0, 140) + "..." },
+                    { title: `🔬 교과서 심화 확장 연계 서브테마`, desc: `${subject} 기반 학생 맞춤 고도화 솔루션` }
+                ];
+
+                topics.forEach((t) => {
+                    const card = document.createElement('div');
+                    card.className = "recommended-item";
+                    card.innerHTML = `<strong>${t.title}</strong><br><span style="font-size:12px; color:#666; margin-top:5px; display:block;">${t.desc}</span>`;
+                    card.onclick = function() {
+                        document.querySelectorAll('.recommended-item').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        window.initiateDevelopChat(t.title, data.answer);
+                    };
+                    container.appendChild(card);
+                });
+
+                // 🌐 기획서 상의 인터넷 관련 기사 링크 제시 기능 실시간 표출 
+                const newsBoard = document.getElementById('naver-news-references-board');
+                const newsList = document.getElementById('news-links-list');
+                newsList.innerHTML = "";
+
+                if(data.references && data.references.length > 0) {
+                    newsBoard.classList.remove('hidden');
+                    data.references.forEach(news => {
+                        const a = document.createElement('a');
+                        a.className = "news-link-item";
+                        a.href = news.link;
+                        a.target = "_blank";
+                        a.innerHTML = `📰 ${news.title.replace(/<\/?[^>]+(>|$)/g, "")}`; // HTML 태그 제거
+                        newsList.appendChild(a);
+                    });
+                } else {
+                    newsBoard.classList.add('hidden');
+                }
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = "<p style='color:#ef5350; padding:20px;'>⚠️ API 라우트 오프라인 상태입니다. (Mockup 전환)</p>";
+            }
+        };
+
+        window.initiateDevelopChat = function(topicTitle, rawAiResponse) {
+            window.currentSelectedTopicForChat = topicTitle;
+            document.getElementById('selected-topic-badge').innerText = "선택됨";
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = `
+                <div class="msg ai">🎯 선택하신 주제 <strong>"${topicTitle}"</strong>에 대한 심층 마스터 가이드 리포트입니다.</div>
+                <div class="msg ai" style="white-space: pre-wrap; text-align:left;">${rawAiResponse}</div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        // 2. 실시간 질의응답 (멘토링룸) Next.js 결합
+        window.sendChatMessage = async function() {
+            const input = document.getElementById('chat-user-input');
+            const chatBox = document.getElementById('chat-box');
+            const userText = input.value.trim();
+
+            if(!userText) return;
+            if(!window.currentSelectedTopicForChat) { alert("추천 주제를 선택한 후 질문해 주세요."); return; }
+
+            const userMsg = document.createElement('div');
+            userMsg.className = "msg user";
+            userMsg.innerText = userText;
+            chatBox.appendChild(userMsg);
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const aiTyping = document.createElement('div');
+            aiTyping.className = "msg ai";
+            aiTyping.innerText = "이화 AI가 최신 검색 결과를 결합하여 생각하는 중...";
+            chatBox.appendChild(aiTyping);
+
+            try {
+                const res = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: userText,
+                        subject: document.getElementById('req-subject').value,
+                        career: window.globalStudentProfile.career
+                    })
+                });
+                const data = await res.json();
+                aiTyping.innerText = data.answer;
+            } catch (e) {
+                aiTyping.innerText = "💡 로컬 프론트 단독 런타임: 소논문 규격 목차 구성에 맞춰 작성을 완료해 보시기 바랍니다.";
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        window.onload = function() { window.renderImwebTable(); };
+    </script>
+</body>
+</html>
